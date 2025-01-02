@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {body} = require("express-validator")
-
+const jwt = require("jsonwebtoken")
 const authMiddleware = require("../middlewares/auth.middleware")
 const userController = require("../controllers/user.controller")
 router.post('/register',[
@@ -17,6 +17,6 @@ router.post("/login",[
 userController.loginUser)
 
 
-router.get("/get-user-profile",authMiddleware.auth,userController.getUserProfle)
-router.get("/logout",authMiddleware.auth,userController.logoutUser)
+router.get("/get-user-profile",authMiddleware.authUser,userController.getUserProfle)
+router.get("/logout",authMiddleware.authUser,userController.logoutUser)
 module.exports = router;
