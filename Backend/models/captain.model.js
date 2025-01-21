@@ -5,23 +5,23 @@ const captainSchema = new mongoose.Schema({
     fullname: {
         firstname: {
             type: String,
-            required: true
+            // required: true
         },
         lastname: {
             type: String,
-            required: true
+            // required: true
         }
     },
     email: {
         type: String,
-        required: true,
-        unique: true,
+        // required: true,
+   
         lowercase: true,
         match: [/^\S+@\S+\.\S+$/, 'please enter a valid email']
     },
     password: {
         type: String,
-        required: true,
+        // required: true,
         select:false
     },
     socketId: {
@@ -42,16 +42,16 @@ const captainSchema = new mongoose.Schema({
         plate:{
             type: String,
             required: true,
-            unique: true
+            minlength: [3,"Plate should be at least 3 characters long"]
         },
         capacity:{
-            type: Number,
+            type: String,
             required: true,
             min: [1,"Capacity should be at least 1"]
         },
         vehicleType:{
             type: String,
-            enum: ['car','motorcycle','auto'],
+            enum: ['car','bike','auto'],
             required: true
         }
 
@@ -68,7 +68,7 @@ const captainSchema = new mongoose.Schema({
 
 
 captainSchema.methods.generateAuthToken = function(){
-    const token = jwt.sign({_id: this._id},process.env.JWT_SECRET)
+    const token = jwt.sign({_id: this._id},process.env.JWT_SECRET,{expiresIn: '24h'});
     return token;
 }
 captainSchema.methods.comparePassword = async function(password){

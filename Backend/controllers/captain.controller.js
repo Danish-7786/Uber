@@ -4,28 +4,46 @@ const { validationResult } = require('express-validator');
 const blacklistTokenModel = require('../models/blacklistToken.model');
 module.exports.registerCaptain = async (req, res) => {
     const errors = validationResult(req);
-    if(!errors.isEmpty()) {
+    if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
-    const { fullname, email,password,vehicle    } = req.body;
-   const isCaptainAlreadyRegistered = await captainModel.findOne({email});
-    if(isCaptainAlreadyRegistered){
-        return res.status(400).json({message:"Captain already registered"});
-    }
-    const hashedPassword = await captainModel.hashPassword(password);
-    const captain = await captainService.createCaptain({
-        firstname:fullname.firstname,
-        lastname:fullname.lastname,
-        email,
-        password: hashedPassword,
-        color:vehicle.color,
-        plate:vehicle.plate,
-        capacity:vehicle.capacity,
-        vehicleType:vehicle.vehicleType
-    });
+
+    const { fullname, email, password, vehicle } = req.body;
     
-    res.status(201).json({ captain });
-}
+
+    try {
+        const isCaptainAlreadyRegistered = await captainModel.findOne({ email });
+        if (isCaptainAlreadyRegistered) {
+            return res.status(400).json({ message: "Captain already registered" });
+        }
+
+        const hashedPassword = await captainModel.hashPassword(password);
+        const data = {
+            fullname: {
+                firstname: fullname.firstname,
+                lastname: fullname.lastname,
+            },
+            email: email,
+            password: hashedPassword,
+            vehicle: {
+                color: vehicle.color,
+                plate: vehicle.plate,
+                capacity: vehicle.capacity,
+                vehicleType: vehicle.vehicleType,
+            },
+        };
+
+
+        const captain = await captainService.createCaptain(data);
+        const token = captain.generateAuthToken();
+
+        res.status(201).json({ token, captain });
+    } catch (error) {
+        console.error("Error occurred:", error);
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+};
+
 
 
 module.exports.loginCaptain = async(req,res)=> {    

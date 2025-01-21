@@ -1,11 +1,38 @@
 import React from "react";
-import { useState } from "react";
-
+import { useState} from "react";
+import { useContext } from "react";
+import axios from "axios";
+import { useNavigate} from "react-router-dom";
+import { CaptainDataContext } from "../context/CaptainContext";
 import { Link } from "react-router-dom";
 function Captainlogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [captainData, setCaptainData] = useState({});
+  // const [captainData, setCaptainData] = useState({});
+  const navigate = useNavigate();
+  const {captain,setCaptain} = useContext(CaptainDataContext);
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    const captainData = {
+      email,
+      password, 
+    }
+   
+    try {
+      const response = await axios.post('http://localhost:8000/captains/login',captainData);
+      if(response){
+        const data = response.data;
+        setCaptain(data.captain);
+        localStorage.setItem('token',data.token);
+        console.log(data);
+        navigate("/captain-home");
+      }
+    } catch (error) {
+      
+    }
+    setEmail(""); 
+    setPassword("");
+  }
   return (
     <div className="p-7 h-screen flex flex-col justify-between">
       <div className="w-20 mb-8">
@@ -18,14 +45,8 @@ function Captainlogin() {
         action=""
         className="flex flex-col gap-4"
         onSubmit={(e) => {
-          e.preventDefault();
-          setCaptainData({
-            email,
-            password,
-          })
-        console.log(captainData);
-          setEmail("");
-          setPassword("");
+       
+          submitHandler(e);
         }}
       >
         <h3 className="font-semibold">What's your email?</h3>
